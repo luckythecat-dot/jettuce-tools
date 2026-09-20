@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jettuce Topic Validation System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette */
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            
+            --border: #e2e8f0;
+            --border-accent: #cbd5e1;
+            
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            
+            --brand-primary: #3b82f6;
+            --brand-light: #eff6ff;
+            --accent-green: #10b981;
+            --accent-green-bg: #d1fae5;
+            --accent-yellow: #f59e0b;
+            --accent-yellow-bg: #fef3c7;
+            --accent-red: #ef4444;
+            --accent-red-bg: #fee2e2;
+            --accent-purple: #8b5cf6;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            display: flex;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* --- HEADER (MOBILE TOP BAR) --- */
+        .mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1.25rem;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            z-index: 30;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, var(--brand-primary), var(--accent-purple));
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .brand-text h1 {
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text-main);
+        }
+
+        .brand-text span {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* --- NAVIGATION SIDEBAR / DRAWER --- */
+        aside {
+            width: 280px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            z-index: 20;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            user-select: none;
+        }
+
+        .nav-item:active {
+            background-color: var(--bg-body);
+        }
+
+        .nav-item.active {
+            background-color: var(--brand-light);
+            color: var(--brand-primary);
+            box-shadow: inset 4px 0 0 var(--brand-primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- BOTTOM NAVIGATION BAR (MOBILE ONLY) --- */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 0.4rem 0.5rem calc(0.4rem + var(--safe-area-bottom)) 0.5rem;
+            z-index: 40;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.4rem 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .bottom-nav-item .nav-icon {
+            font-size: 1.25rem;
+            margin-bottom: 2px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--brand-primary);
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .app-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem 1rem calc(4rem + var(--safe-area-bottom)) 1rem;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .page-view {
+            display: none;
+            animation: fadeIn 0.25s ease-out;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography & Structure */
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .section-block {
+            margin-bottom: 1.75rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .section-title .step-num {
+            background-color: var(--text-main);
+            color: white;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        /* Cards & Components */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            margin-bottom: 0.75rem;
+            font-size: 0.92rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .flow-container {
+            overflow-x: auto;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .flow-diagram {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: max-content;
+        }
+
+        .flow-step {
+            color: var(--brand-primary);
+        }
+        .flow-arrow {
+            color: var(--border-accent);
+        }
+
+        /* Code / Highlight Boxes */
+        .example-box {
+            background: var(--bg-body);
+            border-left: 3px solid var(--brand-primary);
+            padding: 0.85rem 1rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.88rem;
+            margin: 0.85rem 0;
+            color: var(--text-main);
+        }
+
+        .search-term {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--brand-primary);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            word-break: break-word;
+        }
+
+        /* Grids */
+        .grid-2, .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        /* Lists */
+        .status-list {
+            list-style: none;
+        }
+
+        .status-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+        .status-list li:last-child { border-bottom: none; }
+
+        .indicator {
+            font-size: 1rem;
+            line-height: 1.3;
+            flex-shrink: 0;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            background: var(--bg-card);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+            min-width: 500px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.75rem 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background-color: var(--bg-body);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+
+        /* Pass Cards */
+        .pass-box {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            position: relative;
+        }
+        .pass-box h3 {
+            color: var(--brand-primary);
+            margin-bottom: 0.4rem;
+            font-size: 1rem;
+            padding-right: 4rem;
+        }
+        .pass-time {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-body);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        /* Desktop Breakpoint */
+        @media (min-width: 769px) {
+            body { flex-direction: row; }
+            .mobile-header { display: none; }
+            .bottom-nav { display: none !important; }
+            aside { display: flex; }
+            main { padding: 2.5rem 3rem; }
+            .page-title { font-size: 2rem; }
+            .page-subtitle { font-size: 1.1rem; }
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+            .grid-3 { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+            .pass-box-full { grid-column: 1 / -1; }
+        }
+
+        /* Mobile Breakpoint */
+        @media (max-width: 768px) {
+            aside { display: none; }
+            .bottom-nav { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-header">
+        <div class="brand">
+            <div class="brand-icon">J</div>
+            <div class="brand-text">
+                <h1>Validation SOP</h1>
+                <span>Jettuce System</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- DESKTOP SIDEBAR -->
+        <aside>
+            <div class="brand" style="margin-bottom: 2rem;">
+                <div class="brand-icon">J</div>
+                <div class="brand-text">
+                    <h1>Validation SOP</h1>
+                    <span>Jettuce Topic System</span>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="switchTab('overview')">
+                    <span class="nav-icon">🎯</span> Overview & Idea
+                </li>
+                <li class="nav-item" onclick="switchTab('tools')">
+                    <span class="nav-icon">📊</span> Tool Signals
+                </li>
+                <li class="nav-item" onclick="switchTab('comp')">
+                    <span class="nav-icon">🕵️</span> Comp Audit
+                </li>
+                <li class="nav-item" onclick="switchTab('package')">
+                    <span class="nav-icon">📦</span> Packaging
+                </li>
+                <li class="nav-item" onclick="switchTab('sop')">
+                    <span class="nav-icon">⚡</span> 5-Pass SOP
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-content">
+
+            <!-- VIEW 1: OVERVIEW -->
+            <div id="view-overview" class="page-view active">
+                <div class="page-header">
+                    <h1 class="page-title">Topic Validation System</h1>
+                    <p class="page-subtitle">Build a stack of evidence to avoid spending 30 hours on a dead topic.</p>
+                </div>
+
+                <div class="flow-container">
+                    <div class="flow-diagram">
+                        <span class="flow-step">IDEA</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step">DEMAND</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step">COMPETITION</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step">GAP</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step">PACKAGING</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step">FEASIBILITY</span>
+                        <span class="flow-arrow">➔</span>
+                        <span class="flow-step" style="color: var(--accent-green);">DECISION</span>
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <h2 class="section-title"><span class="step-num">0</span> First: The One-Sentence Rule</h2>
+                    <div class="card">
+                        <p>Before opening any tools, force yourself to articulate your premise.</p>
+                        <div class="example-box">
+                            <strong>Formula:</strong><br>
+                            "I want to make a video about [THING] because [REASON PEOPLE MIGHT CARE]."
+                        </div>
+                        <ul class="status-list">
+                            <li>
+                                <span class="indicator">✅</span>
+                                <div>
+                                    <strong>Good:</strong> "I want to make a video about O2Jam because it was a huge part of Filipino internet-café culture and I want to understand what happened to it."
+                                </div>
+                            </li>
+                            <li>
+                                <span class="indicator">✅</span>
+                                <div>
+                                    <strong>Good:</strong> "I want to make a video about Insaniquarium because it is bizarre enough that the experience of playing it might itself be entertaining."
+                                </div>
+                            </li>
+                            <li>
+                                <span class="indicator">❌</span>
+                                <div>
+                                    <strong>Bad:</strong> If you can't explain why a stranger would care, do not research it yet.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: TOOL SIGNALS -->
+            <div id="view-tools" class="page-view">
+                <div class="page-header">
+                    <h1 class="page-title">Tool Signals</h1>
+                    <p class="page-subtitle">Interviewing the search bar for demand and context.</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">1</span> YT Autocomplete</h2>
+                        <p>Your first cheap signal. Start typing the entity and see what branches out.</p>
+                        <div class="example-box">
+                            <span class="search-term">O2Jam why</span><br>
+                            <span class="search-term">O2Jam history</span><br>
+                            <span class="search-term">what happened to O2Jam</span>
+                        </div>
+                        <p><strong>Good:</strong> Multiple questions surround the entity.<br>
+                        <strong>Less Interesting:</strong> You type the game's name and nothing useful appears.</p>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">2</span> Google Autocomplete</h2>
+                        <p>Reflects actual searches, location context, and trending interest. Ask it questions:</p>
+                        <ul style="padding-left: 1.25rem; margin-top: 0.5rem; font-size: 0.9rem;">
+                            <li style="margin-bottom: 0.25rem;"><strong>Problem:</strong> <span class="search-term">why [entity]</span></li>
+                            <li style="margin-bottom: 0.25rem;"><strong>History:</strong> <span class="search-term">[entity] history</span></li>
+                            <li style="margin-bottom: 0.25rem;"><strong>Culture:</strong> <span class="search-term">[entity] Philippines</span></li>
+                            <li><strong>Current:</strong> <span class="search-term">[entity] 2026</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card section-block">
+                    <h2 class="section-title"><span class="step-num">3</span> Google Trends</h2>
+                    <p>Search as a <em>Topic</em> (not just search term) to gauge broad interest. Test timelines: 5 years ➔ 12 months ➔ 90 days.</p>
+                    <div class="grid-3" style="margin-top: 1rem;">
+                        <div style="background: var(--bg-body); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                            <span class="indicator">🟢</span> <strong>Evergreen</strong>
+                            <p style="font-size: 0.8rem; margin-top: 0.3rem;">Continuous interest. Great for "Why Was X So Addictive?"</p>
+                        </div>
+                        <div style="background: var(--bg-body); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                            <span class="indicator">🟢</span> <strong>Resurging</strong>
+                            <p style="font-size: 0.8rem; margin-top: 0.3rem;">Low baseline, sudden spike. Great for "Why is everyone playing X again?"</p>
+                        </div>
+                        <div style="background: var(--bg-body); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                            <span class="indicator">🔴</span> <strong>Dead</strong>
+                            <p style="font-size: 0.8rem; margin-top: 0.3rem;">Flatlines forever. Idea needs to be exceptionally compelling.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">4</span> Compare Entities</h2>
+                        <p>Use Trends to benchmark. e.g., <span class="search-term">Peggle</span> vs <span class="search-term">PvZ</span>.</p>
+                        <p>If your game is smaller, it means a smaller audience but potentially less competition and a tighter community.</p>
+                    </div>
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">5</span> vidIQ Keyword</h2>
+                        <p>Find the <strong>language</strong> the audience uses. They might not search "Retrospective", but they do search "why is it addictive".</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: COMP AUDIT -->
+            <div id="view-comp" class="page-view">
+                <div class="page-header">
+                    <h1 class="page-title">Competition Audit</h1>
+                    <p class="page-subtitle">Finding out what already exists and where the gaps are.</p>
+                </div>
+
+                <div class="section-block">
+                    <h2 class="section-title"><span class="step-num">6</span> Search the Actual Idea</h2>
+                    <div class="example-box" style="border-left-color: var(--accent-red);">
+                        <strong>Stop asking:</strong> "Is Peggle popular?"<br>
+                        <strong>Start asking:</strong> "Does the exact video I want to make already exist?"
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <h2 class="section-title"><span class="step-num">7</span> The Competition Table</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Swipe right/left to view all columns.</p>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Video</th>
+                                    <th>Views</th>
+                                    <th>Age</th>
+                                    <th>Topic / Angle</th>
+                                    <th>Strength</th>
+                                    <th>Weakness</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Video A</td>
+                                    <td>2.1M</td>
+                                    <td>4y</td>
+                                    <td>History</td>
+                                    <td>Strong Authority</td>
+                                    <td>Old / Outdated</td>
+                                </tr>
+                                <tr>
+                                    <td>Video B</td>
+                                    <td>300K</td>
+                                    <td>8mo</td>
+                                    <td>Addiction</td>
+                                    <td>Great Premise</td>
+                                    <td>Weak Thumbnail</td>
+                                </tr>
+                                <tr>
+                                    <td>Video C</td>
+                                    <td>12K</td>
+                                    <td>2mo</td>
+                                    <td>Review</td>
+                                    <td>Recent</td>
+                                    <td>Tiny Reach / Weak</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">8 & 9</span> Content Gaps</h2>
+                        <p>Check YT Studio Trends tab for official gaps. But manually hunt for <strong>Angle Gaps</strong>.</p>
+                        <p>If there's a 2018 history video and a 2022 documentary, but nobody made <em>"Why Did Everyone in the PH Play O2Jam?"</em> ➔ <strong>That's your gap.</strong></p>
+                    </div>
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">11 & 12</span> Outliers</h2>
+                        <p>Look for videos that outperformed their channel's average.</p>
+                        <p>Channel usually gets 20K views, but their video on your topic got <strong>700K</strong>. This proves topic appeal outside subscribers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: PACKAGING & SOCIAL -->
+            <div id="view-package" class="page-view">
+                <div class="page-header">
+                    <h1 class="page-title">Packaging & Social</h1>
+                    <p class="page-subtitle">Ensuring the idea is clickable and has human momentum.</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">13</span> Thumbnail Audit</h2>
+                        <p>What visual promise is the competition making? (Logos, nostalgic screenshots, dramatic faces).</p>
+                        <p>Can you visually communicate a <strong>DIFFERENT</strong> but equally obvious promise?</p>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">14</span> Write 3-5 Titles</h2>
+                        <p>If you can only think of "O2Jam Retrospective", park it.</p>
+                        <ul style="padding-left: 1.25rem; color: var(--brand-primary); font-weight: 600; font-size: 0.88rem;">
+                            <li style="margin-bottom: 0.3rem;">Why Did Everyone in the PH Play O2Jam?</li>
+                            <li style="margin-bottom: 0.3rem;">Whatever Happened to O2Jam?</li>
+                            <li>The Game That Took Over the Philippines</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <h2 class="section-title"><span class="step-num">15</span> The "Stranger Test"</h2>
+                    <div class="example-box">
+                        <strong>Title A:</strong> "O2Jam Retrospective" ➔ <em>Strangers don't care.</em><br><br>
+                        <strong>Title B:</strong> "Why Did Everyone in the Philippines Play O2Jam?" ➔ <em>Strangers are curious about the phenomenon, even if they don't know the game.</em>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">16</span> Reddit / Forums</h2>
+                        <p>Look for emotional energy, nostalgia, arguments, and rediscovery. High emotional energy offsets low raw search volume.</p>
+                    </div>
+                    <div class="card">
+                        <h2 class="section-title"><span class="step-num">17 & 18</span> TikTok & News</h2>
+                        <p>Is the topic experiencing a cultural momentum surge elsewhere? (Viral TikToks, new dev announcements, game shutdowns).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: EXECUTION SOP -->
+            <div id="view-sop" class="page-view">
+                <div class="page-header">
+                    <h1 class="page-title">The 5-Pass SOP</h1>
+                    <p class="page-subtitle">Don't spend 3 hours researching. Follow this timed framework.</p>
+                </div>
+
+                <div class="grid-2 section-block">
+                    <div class="pass-box">
+                        <span class="pass-time">10 MIN</span>
+                        <h3>PASS 1: "Does anyone care?"</h3>
+                        <p>Check YT Auto, Google Auto, Trends, vidIQ. Search the obvious title.</p>
+                        <p><em>Action: If absolutely nothing is happening, park it.</em></p>
+                    </div>
+
+                    <div class="pass-box">
+                        <span class="pass-time">15-20 MIN</span>
+                        <h3>PASS 2: "Is there opportunity?"</h3>
+                        <p>Audit 10-20 top videos. Record views, age, channel size, angles. Find recent outliers and angle gaps.</p>
+                    </div>
+
+                    <div class="pass-box">
+                        <span class="pass-time">10 MIN</span>
+                        <h3>PASS 3: "Can I package this?"</h3>
+                        <p>Write 5 titles. Sketch 2-3 thumbnail concepts.</p>
+                        <p><em>Action: If titles suck and thumbs are impossible, park it.</em></p>
+                    </div>
+
+                    <div class="pass-box">
+                        <span class="pass-time">10 MIN</span>
+                        <h3>PASS 4: "Is there human interest?"</h3>
+                        <p>Check Reddit, TikTok, comments. Look for people talking, not just searching.</p>
+                    </div>
+
+                    <div class="pass-box pass-box-full" style="border-color: var(--brand-primary); background: var(--brand-light);">
+                        <span class="pass-time" style="background: white;">5 MIN</span>
+                        <h3>PASS 5: "Is this worth MY time?"</h3>
+                        <p>1. How many hours will this take? (Remember fatigue)<br>
+                        2. How strong is the evidence?<br>
+                        3. Am I personally excited enough to do it?</p>
+                    </div>
+                </div>
+
+                <div class="card section-block">
+                    <h2 class="section-title">Validation Rubric</h2>
+                    <p>If you get 5-6 strong signals out of 7, greenlight the project.</p>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Signal</th>
+                                    <th>Assessment Goal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Demand</strong></td><td>Do people care?</td></tr>
+                                <tr><td><strong>Momentum</strong></td><td>Do people care <em>right now</em>?</td></tr>
+                                <tr><td><strong>Competition</strong></td><td>How many people already made this?</td></tr>
+                                <tr><td><strong>Gap</strong></td><td>Is there an angle they haven't nailed?</td></tr>
+                                <tr><td><strong>Packaging</strong></td><td>Can I make someone curious in one image/title?</td></tr>
+                                <tr><td><strong>Production</strong></td><td>Can I make this without sacrificing a month?</td></tr>
+                                <tr><td><strong>Personal Fit</strong></td><td>Am I excited enough to make this entertaining?</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- BOTTOM MOBILE NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item active" onclick="switchTab('overview')">
+            <span class="nav-icon">🎯</span>
+            <span>Idea</span>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('tools')">
+            <span class="nav-icon">📊</span>
+            <span>Tools</span>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('comp')">
+            <span class="nav-icon">🕵️</span>
+            <span>Audit</span>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('package')">
+            <span class="nav-icon">📦</span>
+            <span>Package</span>
+        </div>
+        <div class="bottom-nav-item" onclick="switchTab('sop')">
+            <span class="nav-icon">⚡</span>
+            <span>SOP</span>
+        </div>
+    </nav>
+
+    <script>
+        function switchTab(tabId) {
+            // Update Active State in Desktop Sidebar
+            document.querySelectorAll('.nav-menu .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Update Active State in Mobile Bottom Nav
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Set active class on target elements
+            const sidebarTarget = document.querySelector(`.nav-menu .nav-item[onclick*="${tabId}"]`);
+            if (sidebarTarget) sidebarTarget.classList.add('active');
+
+            const bottomNavTarget = document.querySelector(`.bottom-nav-item[onclick*="${tabId}"]`);
+            if (bottomNavTarget) bottomNavTarget.classList.add('active');
+
+            // Switch Active Page View
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            const selectedView = document.getElementById('view-' + tabId);
+            if (selectedView) {
+                selectedView.classList.add('active');
+            }
+
+            // Scroll back to top smoothly
+            document.getElementById('main-content').scrollTop = 0;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jettuce Content Lab - Mobile Interactive Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --border: #e2e8f0;
+            --border-accent: #cbd5e1;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            
+            --accent-yellow: #d97706;
+            --accent-yellow-bg: rgba(217, 119, 6, 0.1);
+            --accent-green: #059669;
+            --accent-green-bg: rgba(5, 150, 105, 0.1);
+            --accent-purple: #7c3aed;
+            --accent-purple-bg: rgba(124, 58, 237, 0.1);
+            --accent-blue: #0284c7;
+            --accent-blue-bg: rgba(2, 132, 199, 0.1);
+
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-bottom: 70px; /* Space for mobile nav */
+        }
+
+        /* Top Mobile Header Bar */
+        .mobile-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand-inline {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .brand-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-yellow), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .brand-title-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            font-size: 0.65rem;
+            color: var(--accent-yellow);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        /* Search Bar Area */
+        .search-container {
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            display: none;
+        }
+
+        .search-container.open {
+            display: block;
+        }
+
+        .search-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 0.8rem 0.6rem 2.2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .search-icon-inside {
+            position: absolute;
+            left: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Horizontal Filter Pills Carousel */
+        .pills-bar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .pills-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .pill-item.active {
+            background-color: var(--accent-yellow-bg);
+            border-color: rgba(217, 119, 6, 0.3);
+            color: var(--accent-yellow);
+        }
+
+        /* Slide-out Mobile Drawer */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background-color: var(--bg-sidebar);
+            z-index: 201;
+            padding: 1.25rem 1rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-drawer.active {
+            transform: translateX(280px);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .nav-group-title {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 1rem 0.5rem 0.5rem 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0.85rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-yellow-bg);
+            color: var(--accent-yellow);
+        }
+
+        .nav-item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .nav-badge {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 999px;
+            background-color: var(--bg-main);
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .nav-item.active .nav-badge {
+            background-color: var(--accent-yellow);
+            color: #fff;
+        }
+
+        /* Main Scrollable Content Area */
+        main {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        .view-page {
+            display: none;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .view-page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.2rem;
+        }
+
+        .page-header-desc {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            line-height: 1.4;
+        }
+
+        /* Banner Cards */
+        .banner-card {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(124, 58, 237, 0.08) 100%);
+            border: 1px solid rgba(217, 119, 6, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.15rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .banner-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--accent-yellow);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .banner-desc {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* Card Layouts */
+        .cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card:active {
+            transform: scale(0.99);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.65rem;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .tag-green { background: var(--accent-green-bg); color: var(--accent-green); }
+        .tag-yellow { background: var(--accent-yellow-bg); color: var(--accent-yellow); }
+        .tag-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+        .tag-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+
+        /* Hook Interactive List */
+        .hook-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            margin-top: 0.65rem;
+        }
+
+        .hook-item {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.775rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.5rem;
+            line-height: 1.35;
+            cursor: pointer;
+        }
+
+        .hook-item:active {
+            background-color: var(--bg-card-hover);
+        }
+
+        .hook-text {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+        }
+
+        .hook-text::before {
+            content: "➜";
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            margin-top: 0.05rem;
+        }
+
+        .copy-icon {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        /* Toast Popup */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #0f172a;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 300;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Detail Modal / Slide-Over */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 250;
+            display: flex;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-sidebar);
+            width: 100%;
+            max-height: 85vh;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1.25rem;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-sidebar);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem 0.25rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+        }
+
+        .mobile-nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.25rem;
+            cursor: pointer;
+            width: 20%;
+        }
+
+        .mobile-nav-btn.active {
+            color: var(--accent-yellow);
+        }
+
+        .mobile-nav-icon {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="mobile-header">
+    <div class="brand-inline">
+        <button class="icon-btn" onclick="toggleDrawer()">☰</button>
+        <div class="brand-avatar">J</div>
+        <div class="brand-title-wrap">
+            <span class="brand-title">Jettuce Lab</span>
+            <span class="brand-subtitle">Content Quarry</span>
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+    </div>
+</header>
+
+<!-- SEARCH BAR TOGGLE -->
+<div class="search-container" id="searchBar">
+    <div class="search-input-wrap">
+        <span class="search-icon-inside">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search topics, hooks, games..." oninput="filterCards()">
+    </div>
+</div>
+
+<!-- CATEGORY FILTER PILLS -->
+<div class="pills-bar">
+    <span class="pill-item active" onclick="filterByPill(this, 'all')">🔥 All Topics</span>
+    <span class="pill-item" onclick="filterByPill(this, 'high-culture')">🇵🇭 High Culture</span>
+    <span class="pill-item" onclick="filterByPill(this, 'quick-pickups')">⚡ Quick Pickups</span>
+    <span class="pill-item" onclick="filterByPill(this, 'retros')">🟡 PopCap Retros</span>
+    <span class="pill-item" onclick="filterByPill(this, 'weird')">🟢 Weird Games</span>
+</div>
+
+<!-- SLIDE-OUT DRAWER OVERLAY & MENU -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+    <div class="drawer-header">
+        <div class="brand-inline">
+            <div class="brand-avatar">J</div>
+            <div class="brand-title-wrap">
+                <span class="brand-title">Jettuce Lab</span>
+                <span class="brand-subtitle">Content Quarry</span>
+            </div>
+        </div>
+        <button class="icon-btn" onclick="toggleDrawer()">✕</button>
+    </div>
+
+    <div class="nav-group-title">Overview</div>
+    <ul class="nav-menu">
+        <li class="nav-item active" onclick="switchPage('board')">
+            <div class="nav-item-content"><span>⚡</span> Priority Board</div>
+            <span class="nav-badge">12</span>
+        </li>
+        <li class="nav-item" onclick="switchPage('identity')">
+            <div class="nav-item-content"><span>🧠</span> Channel Philosophy</div>
+        </li>
+    </ul>
+
+    <div class="nav-group-title">Content Lanes</div>
+    <ul class="nav-menu">
+        <li class="nav-item" onclick="switchPage('retros')">
+            <div class="nav-item-content"><span>🟡</span> PopCap & Retros</div>
+        </li>
+        <li class="nav-item" onclick="switchPage('ph-culture')">
+            <div class="nav-item-content"><span>🇵🇭</span> PH Internet Cafés</div>
+            <span class="nav-badge">Hot</span>
+        </li>
+        <li class="nav-item" onclick="switchPage('weird-games')">
+            <div class="nav-item-content"><span>🟢</span> Weird Premises</div>
+        </li>
+        <li class="nav-item" onclick="switchPage('casual-ecosystem')">
+            <div class="nav-item-content"><span>🐰</span> 2000s Casual & Flash</div>
+        </li>
+    </ul>
+</div>
+
+<!-- MAIN VIEWPORT -->
+<main>
+
+    <!-- PAGE 1: PRIORITY BOARD -->
+    <section id="page-board" class="view-page active">
+        <h1 class="page-header-title">Immediate Candidates</h1>
+        <p class="page-header-desc">High-priority pitches ready for immediate script research.</p>
+
+        <div class="banner-card">
+            <div class="banner-title">
+                <span>🔥</span> The "Jettuce Sweet Spot"
+            </div>
+            <div class="banner-desc">
+                Games with strong premises or weird cultural footprints that <strong>don't require 50 hours of mastery</strong>. Learn core hooks in 2 hours.
+            </div>
+        </div>
+
+        <div class="cards-list">
+            <div class="card" data-category="high-culture" onclick="openModal('O2Jam', 'PH Cafe Rhythm Giant', 'Defined 2000s Philippine computer shop noise with extreme speed and rhythm gameplay.', ['Why Did Everyone in the Philippines Play O2Jam?', 'I Went Back to the Internet Cafe Game That Raised Me'])">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">O2Jam</div>
+                        <div class="card-subtitle">PH Cafe Rhythm Giant</div>
+                    </div>
+                    <span class="tag tag-green">Top Pick</span>
+                </div>
+                <ul class="hook-list" onclick="event.stopPropagation()">
+                    <li class="hook-item" onclick="copyHook('Why Did Everyone in the Philippines Play O2Jam?')">
+                        <span class="hook-text">Why Did Everyone in the Philippines Play O2Jam?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                    <li class="hook-item" onclick="copyHook('I Went Back to the Internet Cafe Game That Raised Me')">
+                        <span class="hook-text">I Went Back to the Internet Cafe Game That Raised Me</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card" data-category="high-culture" onclick="openModal('Audition Online', 'Early Internet Social Phenomenon', 'Spacebar mashing, virtual fashion, and proto-dating subculture.', ['The Internet Cafe Game That Was Basically a Dating App', 'What Happened to Audition Online?'])">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Audition Online</div>
+                        <div class="card-subtitle">Early Internet Social Phenomenon</div>
+                    </div>
+                    <span class="tag tag-green">Top Pick</span>
+                </div>
+                <ul class="hook-list" onclick="event.stopPropagation()">
+                    <li class="hook-item" onclick="copyHook('The Internet Cafe Game That Was Basically a Dating App')">
+                        <span class="hook-text">The Internet Cafe Game That Was Basically a Dating App</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                    <li class="hook-item" onclick="copyHook('What Happened to Audition Online?')">
+                        <span class="hook-text">What Happened to Audition Online?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card" data-category="quick-pickups retros" onclick="openModal('Insaniquarium', 'PopCap Peak Oddity', 'Alien attacks, bizarre pet combos, and chaotic fish feeding mechanics.', ['Why Was This Game So F***ing Weird?', 'How Did PopCap Get Away With Being This Weird?'])">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Insaniquarium</div>
+                        <div class="card-subtitle">PopCap Peak Oddity</div>
+                    </div>
+                    <span class="tag tag-yellow">Low Effort</span>
+                </div>
+                <ul class="hook-list" onclick="event.stopPropagation()">
+                    <li class="hook-item" onclick="copyHook('Why Was This Game So F***ing Weird?')">
+                        <span class="hook-text">Why Was This Game So F***ing Weird?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                    <li class="hook-item" onclick="copyHook('How Did PopCap Get Away With Being This Weird?')">
+                        <span class="hook-text">How Did PopCap Get Away With Being This Weird?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card" data-category="retros" onclick="openModal('Peggle & Zuma', 'Mechanic Perfection', 'Simple pachinko and color-matching mechanics carrying immense dopamine.', ['Why Was Peggle So Addictive?', 'The Game That Turned Color Matching Into Gambling'])">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Peggle & Zuma</div>
+                        <div class="card-subtitle">Mechanic Perfection</div>
+                    </div>
+                    <span class="tag tag-purple">Retrospective</span>
+                </div>
+                <ul class="hook-list" onclick="event.stopPropagation()">
+                    <li class="hook-item" onclick="copyHook('Why Was Peggle So Addictive?')">
+                        <span class="hook-text">Why Was Peggle So Addictive?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                    <li class="hook-item" onclick="copyHook('The Game That Turned Color Matching Into Gambling')">
+                        <span class="hook-text">The Game That Turned Color Matching Into Gambling</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card" data-category="weird quick-pickups" onclick="openModal('Hatoful Boyfriend', 'Pigeon Dating Sim', 'Dating pigeons at an elite avian academy with unexpected plot twists.', ['I Played the Pigeon Dating Simulator'])">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Hatoful Boyfriend</div>
+                        <span class="card-subtitle">Pigeon Dating Sim</span>
+                    </div>
+                    <span class="tag tag-blue">Pure Comedy</span>
+                </div>
+                <ul class="hook-list" onclick="event.stopPropagation()">
+                    <li class="hook-item" onclick="copyHook('I Played the Pigeon Dating Simulator')">
+                        <span class="hook-text">I Played the Pigeon Dating Simulator</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 2: CHANNEL PHILOSOPHY -->
+    <section id="page-identity" class="view-page">
+        <h1 class="page-header-title">Channel Philosophy</h1>
+        <p class="page-header-desc">Core voice, cultural positioning, and content wrappers.</p>
+
+        <div class="cards-list">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Core Identity Statement</div>
+                    <span class="tag tag-purple">Meta Strategy</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+                    Your channel isn't just reviewing old games; it's asking: <strong>"I find games with a story attached to them."</strong> Focus on personal oddities and internet subcultures.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Four Narrative Lenses</div>
+                    <span class="tag tag-blue">Content Angles</span>
+                </div>
+                <ul class="hook-list">
+                    <li class="hook-item"><span class="hook-text">"Why was this specific game so insanely popular?"</span></li>
+                    <li class="hook-item"><span class="hook-text">"What happened to this legacy internet staple?"</span></li>
+                    <li class="hook-item"><span class="hook-text">"How did someone convince an executive to fund this?"</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 3: POPCAP & RETROS -->
+    <section id="page-retros" class="view-page">
+        <h1 class="page-header-title">PopCap & Retros</h1>
+        <p class="page-header-desc">Design questions over chronological recounts.</p>
+
+        <div class="cards-list">
+            <div class="card" data-category="retros">
+                <div class="card-header">
+                    <div class="card-title">Zuma Deluxe</div>
+                    <span class="tag tag-yellow">PopCap</span>
+                </div>
+                <ul class="hook-list">
+                    <li class="hook-item" onclick="copyHook('Why Were We All Addicted to Zuma?')">
+                        <span class="hook-text">Why Were We All Addicted to Zuma?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                    <li class="hook-item" onclick="copyHook('Why Does Zuma Feel So Good to Play?')">
+                        <span class="hook-text">Why Does Zuma Feel So Good to Play?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 4: PH INTERNET CAFE CULTURE -->
+    <section id="page-ph-culture" class="view-page">
+        <h1 class="page-header-title">PH Internet Cafés</h1>
+        <p class="page-header-desc">Regional phenomena, local PC shop mainstays, server nostalgia.</p>
+
+        <div class="cards-list">
+            <div class="card" data-category="high-culture">
+                <div class="card-header">
+                    <div class="card-title">Gunbound</div>
+                    <span class="tag tag-yellow">Culture Angle</span>
+                </div>
+                <ul class="hook-list">
+                    <li class="hook-item" onclick="copyHook('Why Did Everyone at the Computer Shop Play Gunbound?')">
+                        <span class="hook-text">Why Did Everyone at the Computer Shop Play Gunbound?</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 5: WEIRD PREMISES -->
+    <section id="page-weird-games" class="view-page">
+        <h1 class="page-header-title">Weird Premises</h1>
+        <p class="page-header-desc">Absurdist games where inherent oddness drives humor.</p>
+
+        <div class="cards-list">
+            <div class="card" data-category="weird">
+                <div class="card-header">
+                    <div class="card-title">Untitled Goose Game</div>
+                    <span class="tag tag-green">Chaos</span>
+                </div>
+                <ul class="hook-list">
+                    <li class="hook-item" onclick="copyHook('I Played a Game About Being an Absolute Menace')">
+                        <span class="hook-text">I Played a Game About Being an Absolute Menace</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 6: 2000s CASUAL & FLASH ERA -->
+    <section id="page-casual-ecosystem" class="view-page">
+        <h1 class="page-header-title">2000s Casual & Flash</h1>
+        <p class="page-header-desc">Time-management games and browser preservation.</p>
+
+        <div class="cards-list">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Big Fish Games & Dash Clones</div>
+                    <span class="tag tag-yellow">Genre Dive</span>
+                </div>
+                <ul class="hook-list">
+                    <li class="hook-item" onclick="copyHook('I Played Every Dash Game From the 2000s')">
+                        <span class="hook-text">I Played Every "Dash" Game From the 2000s</span>
+                        <span class="copy-icon">📋</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- CARD DETAIL MODAL -->
+<div class="modal-overlay" id="cardModal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="modalTitle">Game Title</div>
+                <div class="card-subtitle" id="modalSubtitle">Subtitle</div>
+            </div>
+            <button class="icon-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <p id="modalDesc" style="margin-bottom: 1rem;"></p>
+            <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">Video Pitch Angles:</div>
+            <ul class="hook-list" id="modalHooks"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">Copied hook to clipboard!</div>
+
+<!-- MOBILE BOTTOM NAVIGATION -->
+<nav class="mobile-nav">
+    <button class="mobile-nav-btn active" onclick="switchPage('board')">
+        <span class="mobile-nav-icon">⚡</span>
+        <span>Board</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="switchPage('retros')">
+        <span class="mobile-nav-icon">🟡</span>
+        <span>Retros</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="switchPage('ph-culture')">
+        <span class="mobile-nav-icon">🇵🇭</span>
+        <span>PH Cafe</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="switchPage('weird-games')">
+        <span class="mobile-nav-icon">🟢</span>
+        <span>Weird</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="switchPage('casual-ecosystem')">
+        <span class="mobile-nav-icon">🐰</span>
+        <span>Rabbit</span>
+    </button>
+</nav>
+
+<script>
+    // Navigation & View Switching
+    function switchPage(pageId) {
+        document.querySelectorAll('.view-page').forEach(page => page.classList.remove('active'));
+        const targetPage = document.getElementById('page-' + pageId);
+        if (targetPage) targetPage.classList.add('active');
+
+        // Update Drawer Nav
+        document.querySelectorAll('#mobileDrawer .nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(pageId)) {
+                item.classList.add('active');
+            }
+        });
+
+        // Update Bottom Nav
+        document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(pageId)) {
+                btn.classList.add('active');
+            }
+        });
+
+        closeDrawer();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Slide-out Drawer Controls
+    function toggleDrawer() {
+        document.getElementById('mobileDrawer').classList.toggle('active');
+        document.getElementById('drawerOverlay').classList.toggle('active');
+    }
+
+    function closeDrawer() {
+        document.getElementById('mobileDrawer').classList.remove('active');
+        document.getElementById('drawerOverlay').classList.remove('active');
+    }
+
+    // Toggle Search Bar
+    function toggleSearch() {
+        const searchBar = document.getElementById('searchBar');
+        searchBar.classList.toggle('open');
+        if (searchBar.classList.contains('open')) {
+            document.getElementById('searchInput').focus();
+        }
+    }
+
+    // Live Card Search
+    function filterCards() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.card').forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    // Category Pill Filtering
+    function filterByPill(element, category) {
+        document.querySelectorAll('.pill-item').forEach(pill => pill.classList.remove('active'));
+        element.classList.add('active');
+
+        document.querySelectorAll('.card').forEach(card => {
+            if (category === 'all') {
+                card.style.display = 'flex';
+            } else {
+                const cardCategories = card.getAttribute('data-category') || '';
+                card.style.display = cardCategories.includes(category) ? 'flex' : 'none';
+            }
+        });
+    }
+
+    // Clipboard Copy Toast
+    function copyHook(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        });
+    }
+
+    // Modal Details Popup
+    function openModal(title, subtitle, desc, hooks) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalSubtitle').innerText = subtitle;
+        document.getElementById('modalDesc').innerText = desc;
+
+        const hooksContainer = document.getElementById('modalHooks');
+        hooksContainer.innerHTML = '';
+        hooks.forEach(hook => {
+            const li = document.createElement('li');
+            li.className = 'hook-item';
+            li.onclick = () => copyHook(hook);
+            li.innerHTML = `<span class="hook-text">${hook}</span><span class="copy-icon">📋</span>`;
+            hooksContainer.appendChild(li);
+        });
+
+        document.getElementById('cardModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('cardModal').classList.remove('open');
+    }
+</script>
+
+</body>
+</html>

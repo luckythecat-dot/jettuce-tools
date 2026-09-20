@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jettuce Content Lab - Mobile Content Quarry</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for crisp mobile iconography -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom scrollbar for mobile filter pills and sidebar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Active navigation state highlight */
+        .nav-item-active {
+            background-color: #f1f5f9;
+            color: #2563eb;
+            font-weight: 600;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Bottom Nav Active State */
+        .bottom-nav-active {
+            color: #2563eb;
+        }
+        .bottom-nav-active i {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        /* Card tap feedback animation */
+        .card-tap-effect {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .card-tap-effect:active {
+            transform: scale(0.98);
+        }
+
+        /* Toast notification styling */
+        #toast {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Safe area padding for bottom bar on iPhones */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 1rem);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-20 lg:pb-6 antialiased">
+
+    <!-- Copy Notification Toast -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toast-message">Copied hook to clipboard!</span>
+    </div>
+
+    <!-- Mobile Sticky Top Header -->
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+        <div class="px-4 py-3 flex items-center justify-between gap-3">
+            <!-- Left: Mobile Menu Toggle & Brand -->
+            <div class="flex items-center gap-3">
+                <button id="hamburger-btn" aria-label="Open Sidebar Menu" class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex flex-col">
+                    <span class="text-xs font-black uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-flask"></i> Jettuce Lab
+                    </span>
+                    <h1 class="text-sm font-bold text-slate-900 leading-tight truncate max-w-[160px] sm:max-w-none">
+                        Content Quarry
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Right: Search Toggle & Quick Stats -->
+            <div class="flex items-center gap-2">
+                <div class="hidden sm:flex items-center bg-slate-100 px-3 py-1.5 rounded-lg text-xs text-slate-600 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> 24 Ideas Active
+                </div>
+                <button id="search-toggle-btn" aria-label="Toggle Search" class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition">
+                    <i class="fa-solid fa-magnifying-glass text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Search Drawer -->
+        <div id="search-drawer" class="hidden px-4 pb-3 border-t border-slate-100 pt-2 bg-slate-50">
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="global-search-input" placeholder="Search titles, concepts, hooks, or games..." class="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder-slate-400 shadow-sm">
+                <button id="clear-search-btn" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Horizontal Filter Chips Bar -->
+        <div class="px-4 py-2 border-t border-slate-100 flex gap-2 overflow-x-auto no-scrollbar bg-white">
+            <button class="filter-chip active bg-slate-900 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="all">
+                All Pitch Candidates
+            </button>
+            <button class="filter-chip bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="High Culture">
+                <i class="fa-solid fa-crown text-amber-500 mr-1"></i> High Culture
+            </button>
+            <button class="filter-chip bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="Quick Pickups">
+                <i class="fa-solid fa-bolt text-yellow-500 mr-1"></i> Quick Pickups
+            </button>
+            <button class="filter-chip bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="Retro Nostalgia">
+                <i class="fa-solid fa-gamepad text-purple-500 mr-1"></i> Retro Nostalgia
+            </button>
+            <button class="filter-chip bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="PH Culture">
+                <i class="fa-solid fa-flag text-red-500 mr-1"></i> PH Culture
+            </button>
+            <button class="filter-chip bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition active:scale-95" data-filter="Casual & Flash">
+                <i class="fa-solid fa-desktop text-blue-500 mr-1"></i> Flash Era
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer Overlay & Panel -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    
+    <aside id="nav-drawer" class="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
+        <!-- Drawer Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white shadow-md">
+                    J
+                </div>
+                <div>
+                    <h2 class="font-bold text-base leading-tight">Jettuce Lab</h2>
+                    <p class="text-xs text-slate-400">Content Quarry v2.0</p>
+                </div>
+            </div>
+            <button id="close-drawer-btn" aria-label="Close Navigation" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="p-3 space-y-1 overflow-y-auto flex-1">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-1">Primary Content Lanes</div>
+            
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between nav-item-active transition" data-target="priority-board">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-fire text-amber-500 w-5 text-center"></i> Priority Candidates
+                </span>
+                <span class="bg-blue-100 text-blue-700 font-bold text-xs px-2 py-0.5 rounded-full">6</span>
+            </button>
+
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between text-slate-700 hover:bg-slate-100 transition" data-target="channel-philosophy">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-compass text-blue-500 w-5 text-center"></i> Channel Philosophy
+                </span>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+            </button>
+
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between text-slate-700 hover:bg-slate-100 transition" data-target="popcap-retros">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-ghost text-purple-500 w-5 text-center"></i> PopCap & Retros
+                </span>
+                <span class="bg-slate-100 text-slate-600 font-semibold text-xs px-2 py-0.5 rounded-full">4</span>
+            </button>
+
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between text-slate-700 hover:bg-slate-100 transition" data-target="ph-cafes">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-network-wired text-red-500 w-5 text-center"></i> PH Internet Cafés
+                </span>
+                <span class="bg-slate-100 text-slate-600 font-semibold text-xs px-2 py-0.5 rounded-full">4</span>
+            </button>
+
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between text-slate-700 hover:bg-slate-100 transition" data-target="weird-premises">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-brain text-emerald-500 w-5 text-center"></i> Weird Premises
+                </span>
+                <span class="bg-slate-100 text-slate-600 font-semibold text-xs px-2 py-0.5 rounded-full">4</span>
+            </button>
+
+            <button class="section-nav-link w-full text-left px-3.5 py-3 rounded-xl text-sm flex items-center justify-between text-slate-700 hover:bg-slate-100 transition" data-target="flash-era">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fa-solid fa-bolt text-yellow-500 w-5 text-center"></i> 2000s Casual & Flash
+                </span>
+                <span class="bg-slate-100 text-slate-600 font-semibold text-xs px-2 py-0.5 rounded-full">4</span>
+            </button>
+        </nav>
+
+        <!-- Drawer Footer -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50 text-xs text-slate-500 flex items-center justify-between">
+            <span>Tap hook text to copy</span>
+            <span class="font-bold text-slate-700">Mobile Edition</span>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT VIEW AREA -->
+    <main class="max-w-4xl mx-auto px-4 pt-4">
+
+        <!-- ================= SECTION 1: PRIORITY BOARD ================= -->
+        <section id="section-priority-board" class="content-section space-y-4">
+            <!-- Section Title Header -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col gap-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1">
+                        <i class="fa-solid fa-fire"></i> Top Picks
+                    </span>
+                    <span class="text-xs bg-amber-50 text-amber-700 font-semibold px-2.5 py-1 rounded-full border border-amber-200">
+                        6 Ideas Ready
+                    </span>
+                </div>
+                <h2 class="text-lg font-extrabold text-slate-900">Priority Content Board</h2>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Highest conviction video concepts evaluated for audience retention, narrative payoff, and editorial feasibility.
+                </p>
+            </div>
+
+            <!-- Pitch Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="priority-cards-container">
+                
+                <!-- CARD 1 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3 relative overflow-hidden" data-category="High Culture" data-title="Chuzzle: PopCap's Cutest Horror Game">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-purple-200">
+                            High Culture / PopCap
+                        </span>
+                        <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            High Priority
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug card-title">
+                            Chuzzle: PopCap's Cutest Horror Game
+                        </h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">
+                            How a vibrant match-3 puzzle game subtly induces claustrophobia and psychological tension when furballs lock up.
+                        </p>
+                    </div>
+
+                    <!-- Hooks Block -->
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                            <span>Key Video Hooks (Tap to Copy)</span>
+                            <i class="fa-regular fa-copy text-slate-400"></i>
+                        </div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"Why did PopCap create a fuzzy puzzle game that accidentally gives players claustrophobia?"</span>
+                            </li>
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"The innocent match-3 game that turns into a high-stakes puzzle lockup."</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Footer Details -->
+                    <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                        <span class="flex items-center gap-1 font-medium text-slate-600">
+                            <i class="fa-solid fa-film text-slate-400"></i> Video Essay
+                        </span>
+                        <button class="view-detail-btn font-semibold text-blue-600 flex items-center gap-1 hover:underline text-xs py-1 px-2">
+                            View Pitch <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- CARD 2 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3 relative overflow-hidden" data-category="PH Culture" data-title="The PH Internet Café Golden Era">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="bg-red-100 text-red-800 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-red-200">
+                            PH Culture
+                        </span>
+                        <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            Nostalgia Pick
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug card-title">
+                            Inside 2000s Philippine Internet Cafés
+                        </h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">
+                            LAN gaming culture, PC rental tokens, Dota 1 shouting matches, and the iconic noise of LAN shops.
+                        </p>
+                    </div>
+
+                    <!-- Hooks Block -->
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                            <span>Key Video Hooks (Tap to Copy)</span>
+                            <i class="fa-regular fa-copy text-slate-400"></i>
+                        </div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"The distinct smell of hot pancit canton and overclocked PC fans in 2006."</span>
+                            </li>
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"Before high-speed home Wi-Fi, ₱15 an hour was our ticket to paradise."</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Footer Details -->
+                    <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                        <span class="flex items-center gap-1 font-medium text-slate-600">
+                            <i class="fa-solid fa-film text-slate-400"></i> Docu-Style
+                        </span>
+                        <button class="view-detail-btn font-semibold text-blue-600 flex items-center gap-1 hover:underline text-xs py-1 px-2">
+                            View Pitch <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- CARD 3 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3 relative overflow-hidden" data-category="Quick Pickups" data-title="Bookworm: The Game That Made Vocabulary Action-Packed">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="bg-yellow-100 text-yellow-800 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-yellow-200">
+                            Quick Pickups
+                        </span>
+                        <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                            Retro PopCap
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug card-title">
+                            Bookworm & Lex the Green Worm
+                        </h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">
+                            How burning tiles and burning dictionary words turned word games into intense arcade puzzles.
+                        </p>
+                    </div>
+
+                    <!-- Hooks Block -->
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                            <span>Key Video Hooks (Tap to Copy)</span>
+                            <i class="fa-regular fa-copy text-slate-400"></i>
+                        </div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"When spelling a 7-letter word saved you from burning down your library."</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                        <span class="flex items-center gap-1 font-medium text-slate-600">
+                            <i class="fa-solid fa-film text-slate-400"></i> Retrospective
+                        </span>
+                        <button class="view-detail-btn font-semibold text-blue-600 flex items-center gap-1 hover:underline text-xs py-1 px-2">
+                            View Pitch <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- CARD 4 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3 relative overflow-hidden" data-category="Casual & Flash" data-title="Flash Games We Played at School">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-blue-200">
+                            Casual & Flash
+                        </span>
+                        <span class="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                            High Engagement
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug card-title">
+                            Unblocked Web Games in the Computer Lab
+                        </h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">
+                            Armor Games, Miniclip, and Newgrounds classics played secretly under the strict watch of teachers.
+                        </p>
+                    </div>
+
+                    <!-- Hooks Block -->
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                            <span>Key Video Hooks (Tap to Copy)</span>
+                            <i class="fa-regular fa-copy text-slate-400"></i>
+                        </div>
+                        <ul class="space-y-1.5 text-xs text-slate-700">
+                            <li class="hook-item cursor-pointer hover:text-blue-600 transition flex items-start gap-2 bg-white p-2 rounded-lg border border-slate-200/60 shadow-2xs">
+                                <i class="fa-solid fa-quote-left text-slate-300 text-xs mt-0.5"></i>
+                                <span>"Alt-Tab speedrunning when the computer teacher walked down your aisle."</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                        <span class="flex items-center gap-1 font-medium text-slate-600">
+                            <i class="fa-solid fa-film text-slate-400"></i> Deep Dive
+                        </span>
+                        <button class="view-detail-btn font-semibold text-blue-600 flex items-center gap-1 hover:underline text-xs py-1 px-2">
+                            View Pitch <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: CHANNEL PHILOSOPHY ================= -->
+        <section id="section-channel-philosophy" class="content-section space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-compass"></i> Editorial Framework
+                </div>
+                <h2 class="text-xl font-extrabold text-slate-900">Jettuce Content Philosophy</h2>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Our videos bridge nostalgic casual gaming, internet pop culture, and analytical depth. Here are our core editorial tenets.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
+                        <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-amber-500 text-xs"></i> 1. The High-Culture Lens
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Treat casual games (PopCap, Flash games) with the same narrative seriousness as AAA masterpieces.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
+                        <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-yellow-500 text-xs"></i> 2. Immediate Hook Discipline
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Hook the viewer in the first 8 seconds with a specific premise or core memory instead of vague intros.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
+                        <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-heart text-red-500 text-xs"></i> 3. Emotional Nostalgia
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Connect gameplay mechanics directly to childhood environments (after school, internet cafés, family PCs).
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-1">
+                        <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-blue-500 text-xs"></i> 4. Fast-Paced Visual Editing
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Keep visual rhythm active with UI zooms, retro SFX, archival soundbites, and snappy motion graphics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: POPCAP & RETROS ================= -->
+        <section id="section-popcap-retros" class="content-section space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-600"><i class="fa-solid fa-ghost"></i> Archive</span>
+                <h2 class="text-lg font-bold text-slate-900">PopCap & Retro Classics</h2>
+                <p class="text-xs text-slate-600 mt-0.5">Focusing on early 2000s desktop staples and puzzle masterpieces.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- PopCap Card 1 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3" data-category="Retro Nostalgia" data-title="Insaniquarium: The Chaotic Masterpiece">
+                    <div class="flex items-start justify-between">
+                        <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-lg">PopCap Era</span>
+                        <span class="text-xs font-semibold text-slate-500">Video Essay</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Insaniquarium: Why Feeding Aliens to Guppies Worked</h3>
+                    <p class="text-xs text-slate-600">Analyzing the bizarre mechanics, alien boss fights, and clicker frenzy of PopCap's virtual tank.</p>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <p class="hook-item text-xs text-slate-700 cursor-pointer hover:text-blue-600 font-medium">
+                            <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> "How PopCap tricked us into playing an alien-survival horror game disguised as a fish tank."
+                        </p>
+                    </div>
+                </article>
+
+                <!-- PopCap Card 2 -->
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3" data-category="Retro Nostalgia" data-title="Zuma Deluxe: Frog Mechanics & Egyptian Beats">
+                    <div class="flex items-start justify-between">
+                        <span class="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-1 rounded-lg">PopCap Era</span>
+                        <span class="text-xs font-semibold text-slate-500">Analysis</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Zuma Deluxe and the Art of Marble Stress</h3>
+                    <p class="text-xs text-slate-600">The iconic sound design, rotation precision, and tribal soundtrack that dominated early PC gaming.</p>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <p class="hook-item text-xs text-slate-700 cursor-pointer hover:text-blue-600 font-medium">
+                            <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> "That one sound effect in Zuma when the marbles get dangerously close to the skull..."
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: PH INTERNET CAFES ================= -->
+        <section id="section-ph-cafes" class="content-section space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold uppercase tracking-wider text-red-600"><i class="fa-solid fa-network-wired"></i> Local History</span>
+                <h2 class="text-lg font-bold text-slate-900">PH Internet Cafés & LAN Gaming</h2>
+                <p class="text-xs text-slate-600 mt-0.5">Capturing the unique socio-cultural phenomenon of PH computer shops.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3" data-category="PH Culture" data-title="Special Force & SF Online Legends">
+                    <div class="flex items-start justify-between">
+                        <span class="bg-red-100 text-red-800 text-[11px] font-bold px-2.5 py-1 rounded-lg">PH LAN Era</span>
+                        <span class="text-xs font-semibold text-slate-500">Docu Pitch</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Special Force PH: The FPS Empire Before CS:GO</h3>
+                    <p class="text-xs text-slate-600">Sniper double-zooms, e-Coin cards, and competitive shop vs shop rivalries across Manila.</p>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <p class="hook-item text-xs text-slate-700 cursor-pointer hover:text-blue-600 font-medium">
+                            <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> "Before Valorant or CS2, this FPS game ruled every single computer shop in the Philippines."
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 5: WEIRD PREMISES ================= -->
+        <section id="section-weird-premises" class="content-section space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600"><i class="fa-solid fa-brain"></i> Oddities</span>
+                <h2 class="text-lg font-bold text-slate-900">Weird Game Premises</h2>
+                <p class="text-xs text-slate-600 mt-0.5">Exploring unconventional gameplay loops and odd indie experiments.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3" data-category="High Culture" data-title="Sim City Disasters: Why Destruction Was More Fun">
+                    <div class="flex items-start justify-between">
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-lg">Unusual Angles</span>
+                        <span class="text-xs font-semibold text-slate-500">Essay</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Why Everyone Played SimCity Just to Destroy It</h3>
+                    <p class="text-xs text-slate-600">The psychological appeal of launching tornadoes, aliens, and meteors on your own meticulously built cities.</p>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <p class="hook-item text-xs text-slate-700 cursor-pointer hover:text-blue-600 font-medium">
+                            <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> "We spent 10 hours building a utopian city just to let a giant alien monster burn it down."
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 6: 2000s CASUAL & FLASH ================= -->
+        <section id="section-flash-era" class="content-section space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <span class="text-xs font-bold uppercase tracking-wider text-yellow-600"><i class="fa-solid fa-bolt"></i> Web Era</span>
+                <h2 class="text-lg font-bold text-slate-900">2000s Casual & Flash Gaming</h2>
+                <p class="text-xs text-slate-600 mt-0.5">Browser legends, Adobe Flash, and web browser nostalgia.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <article class="idea-card bg-white rounded-2xl border border-slate-200 p-4 shadow-sm card-tap-effect space-y-3" data-category="Casual & Flash" data-title="The Papa's Pizzeria Restaurant Empire">
+                    <div class="flex items-start justify-between">
+                        <span class="bg-yellow-100 text-yellow-800 text-[11px] font-bold px-2.5 py-1 rounded-lg">Flash Legends</span>
+                        <span class="text-xs font-semibold text-slate-500">Retrospective</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">The High Stress Philosophy of Papa Louie Games</h3>
+                    <p class="text-xs text-slate-600">How Flipline Studios turned multitasking customer service into the most addicting browser games ever made.</p>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <p class="hook-item text-xs text-slate-700 cursor-pointer hover:text-blue-600 font-medium">
+                            <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> "How a pizza making Flash game taught an entire generation how to handle rush-hour anxiety."
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Card Detail Modal Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div id="modal-container" class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[85vh] overflow-y-auto p-5 space-y-4 shadow-2xl transform translate-y-8 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span id="modal-category" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">
+                    Category Tag
+                </span>
+                <button id="close-modal-btn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div>
+                <h3 id="modal-title" class="text-lg font-bold text-slate-900 leading-snug">
+                    Video Concept Title
+                </h3>
+                <p id="modal-description" class="text-xs text-slate-600 mt-2 leading-relaxed">
+                    Detailed breakdown description will appear here.
+                </p>
+            </div>
+
+            <!-- Pitch Breakdown Box -->
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-2">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-blue-600"></i> Narrative Outline
+                </h4>
+                <ul class="text-xs space-y-1.5 text-slate-600 list-disc list-inside">
+                    <li>Act I: The Initial Hook & Nostalgic Core Memory</li>
+                    <li>Act II: Hidden Game Design Brilliance</li>
+                    <li>Act III: Socio-Cultural Impact & Final Takeaway</li>
+                </ul>
+            </div>
+
+            <div class="pt-2 flex gap-2">
+                <button id="modal-copy-all" class="flex-1 bg-slate-900 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-slate-800 active:scale-95 transition">
+                    <i class="fa-regular fa-copy"></i> Copy Pitch Summary
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Mobile Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 pb-safe shadow-lg">
+        <div class="max-w-md mx-auto grid grid-cols-5 gap-1">
+            <button class="bottom-nav-link flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 hover:text-slate-900 transition bottom-nav-active" data-target="priority-board">
+                <i class="fa-solid fa-fire text-base mb-1"></i>
+                <span class="text-[10px] font-medium leading-none">Priority</span>
+            </button>
+
+            <button class="bottom-nav-link flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 hover:text-slate-900 transition" data-target="popcap-retros">
+                <i class="fa-solid fa-ghost text-base mb-1"></i>
+                <span class="text-[10px] font-medium leading-none">PopCap</span>
+            </button>
+
+            <button class="bottom-nav-link flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 hover:text-slate-900 transition" data-target="ph-cafes">
+                <i class="fa-solid fa-network-wired text-base mb-1"></i>
+                <span class="text-[10px] font-medium leading-none">PH LAN</span>
+            </button>
+
+            <button class="bottom-nav-link flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 hover:text-slate-900 transition" data-target="flash-era">
+                <i class="fa-solid fa-bolt text-base mb-1"></i>
+                <span class="text-[10px] font-medium leading-none">Flash</span>
+            </button>
+
+            <button id="more-menu-btn" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 hover:text-slate-900 transition">
+                <i class="fa-solid fa-ellipsis text-base mb-1"></i>
+                <span class="text-[10px] font-medium leading-none">More</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // DOM Elements
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const closeDrawerBtn = document.getElementById('close-drawer-btn');
+            const navDrawer = document.getElementById('nav-drawer');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const searchToggleBtn = document.getElementById('search-toggle-btn');
+            const searchDrawer = document.getElementById('search-drawer');
+            const globalSearchInput = document.getElementById('global-search-input');
+            const clearSearchBtn = document.getElementById('clear-search-btn');
+            const filterChips = document.querySelectorAll('.filter-chip');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            // Modal DOM
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContainer = document.getElementById('modal-container');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalCategory = document.getElementById('modal-category');
+            const modalDescription = document.getElementById('modal-description');
+
+            // Navigation Links
+            const drawerNavLinks = document.querySelectorAll('.section-nav-link');
+            const bottomNavLinks = document.querySelectorAll('.bottom-nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const moreMenuBtn = document.getElementById('more-menu-btn');
+
+            /* --- Drawer Controls --- */
+            function openDrawer() {
+                drawerOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    drawerOverlay.classList.remove('opacity-0');
+                    navDrawer.classList.remove('-translate-x-full');
+                }, 10);
+            }
+
+            function closeDrawer() {
+                navDrawer.classList.add('-translate-x-full');
+                drawerOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    drawerOverlay.classList.add('hidden');
+                }, 300);
+            }
+
+            hamburgerBtn.addEventListener('click', openDrawer);
+            closeDrawerBtn.addEventListener('click', closeDrawer);
+            drawerOverlay.addEventListener('click', closeDrawer);
+            moreMenuBtn.addEventListener('click', openDrawer);
+
+            /* --- Section Switcher --- */
+            function switchSection(targetId) {
+                // Hide all sections
+                contentSections.forEach(section => section.classList.add('hidden'));
+
+                // Show target section
+                const targetSection = document.getElementById(`section-${targetId}`);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                }
+
+                // Update Drawer Active Classes
+                drawerNavLinks.forEach(link => {
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('nav-item-active');
+                    } else {
+                        link.classList.remove('nav-item-active');
+                    }
+                });
+
+                // Update Bottom Nav Active Classes
+                bottomNavLinks.forEach(link => {
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('bottom-nav-active');
+                    } else {
+                        link.classList.remove('bottom-nav-active');
+                    }
+                });
+
+                // Close drawer if open
+                closeDrawer();
+
+                // Scroll to top smooth
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            drawerNavLinks.forEach(link => {
+                link.addEventListener('click', () => switchSection(link.dataset.target));
+            });
+
+            bottomNavLinks.forEach(link => {
+                link.addEventListener('click', () => switchSection(link.dataset.target));
+            });
+
+            /* --- Search Bar Drawer Toggle --- */
+            searchToggleBtn.addEventListener('click', () => {
+                searchDrawer.classList.toggle('hidden');
+                if (!searchDrawer.classList.contains('hidden')) {
+                    globalSearchInput.focus();
+                }
+            });
+
+            /* --- Global Live Search --- */
+            globalSearchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (query.length > 0) {
+                    clearSearchBtn.classList.remove('hidden');
+                } else {
+                    clearSearchBtn.classList.add('hidden');
+                }
+
+                // Search across all visible cards
+                const allCards = document.querySelectorAll('.idea-card');
+                allCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                globalSearchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                document.querySelectorAll('.idea-card').forEach(card => card.style.display = 'block');
+            });
+
+            /* --- Category Chip Filtering --- */
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    // Toggle active chip style
+                    filterChips.forEach(c => {
+                        c.classList.remove('bg-slate-900', 'text-white');
+                        c.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    chip.classList.remove('bg-slate-100', 'text-slate-600');
+                    chip.classList.add('bg-slate-900', 'text-white');
+
+                    const selectedCategory = chip.dataset.filter;
+                    const allCards = document.querySelectorAll('.idea-card');
+
+                    allCards.forEach(card => {
+                        const cardCat = card.dataset.category;
+                        if (selectedCategory === 'all' || cardCat === selectedCategory) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            /* --- Toast Notification Helper --- */
+            function showToast(message) {
+                toastMessage.textContent = message;
+                toast.classList.remove('opacity-0', 'pointer-events-none');
+                toast.classList.add('opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0', 'pointer-events-none');
+                }, 2200);
+            }
+
+            /* --- Copy Hook to Clipboard --- */
+            document.querySelectorAll('.hook-item').forEach(hook => {
+                hook.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent modal opening when clicking hook text
+                    const hookText = hook.textContent.trim();
+
+                    // Fallback copy for iframe environment
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = hookText;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+                    showToast('Copied hook to clipboard!');
+                });
+            });
+
+            /* --- Card Detail Modal View --- */
+            function openModal(title, category, description) {
+                modalTitle.textContent = title;
+                modalCategory.textContent = category;
+                modalDescription.textContent = description || "Comprehensive video pitch deck with script hooks, visual b-roll breakdown, and target demographics.";
+
+                modalOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    modalOverlay.classList.remove('opacity-0');
+                    modalContainer.classList.remove('translate-y-8');
+                }, 10);
+            }
+
+            function closeModal() {
+                modalContainer.classList.add('translate-y-8');
+                modalOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    modalOverlay.classList.add('hidden');
+                }, 300);
+            }
+
+            // Bind click to cards and buttons
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const card = btn.closest('.idea-card');
+                    const title = card.querySelector('.card-title')?.textContent || 'Video Pitch';
+                    const category = card.dataset.category || 'General';
+                    const desc = card.querySelector('p')?.textContent;
+                    openModal(title, category, desc);
+                });
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            document.getElementById('modal-copy-all').addEventListener('click', () => {
+                showToast('Copied pitch summary!');
+                closeModal();
+            });
+
+        });
+    </script>
+</body>
+</html>

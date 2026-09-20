@@ -1,2 +1,746 @@
 # jettuce-tools
 Content Quarry
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jettuce Topic Validation System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Brighter, App-like UI Palette */
+            --bg-body: #f1f5f9;       /* Soft blue-gray background */
+            --bg-sidebar: #ffffff;    /* Crisp white sidebar */
+            --bg-card: #ffffff;       /* Crisp white cards */
+            --bg-card-hover: #f8fafc;
+            
+            --border: #e2e8f0;
+            --border-accent: #cbd5e1;
+            
+            --text-main: #0f172a;     /* Very dark slate for high readability */
+            --text-secondary: #475569;/* Medium slate */
+            --text-muted: #64748b;
+            
+            --brand-primary: #3b82f6; /* Bright Blue */
+            --brand-light: #eff6ff;
+            --accent-green: #10b981;
+            --accent-green-bg: #d1fae5;
+            --accent-yellow: #f59e0b;
+            --accent-yellow-bg: #fef3c7;
+            --accent-red: #ef4444;
+            --accent-red-bg: #fee2e2;
+            --accent-purple: #8b5cf6;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR NAVIGATION --- */
+        aside {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            z-index: 20;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, var(--brand-primary), var(--accent-purple));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+
+        .brand-text h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-main);
+        }
+
+        .brand-text span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: var(--brand-light);
+            color: var(--brand-primary);
+            box-shadow: inset 3px 0 0 var(--brand-primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2.5rem 3rem;
+            scroll-behavior: smooth;
+        }
+
+        .page-view {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography & Structure */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .section-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .section-title .step-num {
+            background-color: var(--text-main);
+            color: white;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Cards & Containers */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .card p {
+            margin-bottom: 1rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .flow-step {
+            color: var(--brand-primary);
+        }
+        .flow-arrow {
+            color: var(--border-accent);
+        }
+
+        /* Code / Quote Blocks */
+        .example-box {
+            background: var(--bg-body);
+            border-left: 4px solid var(--brand-primary);
+            padding: 1rem 1.25rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            margin: 1rem 0;
+            color: var(--text-main);
+        }
+
+        .search-term {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        /* Lists & Bullet points */
+        .status-list {
+            list-style: none;
+        }
+
+        .status-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .status-list li:last-child { border-bottom: none; }
+
+        .indicator {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background-color: var(--bg-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover { background-color: var(--bg-card-hover); }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-green { background: var(--accent-green-bg); color: #065f46; }
+        .badge-yellow { background: var(--accent-yellow-bg); color: #92400e; }
+        .badge-red { background: var(--accent-red-bg); color: #991b1b; }
+
+        /* Checklist boxes */
+        .pass-box {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            position: relative;
+        }
+        .pass-box h3 {
+            color: var(--brand-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .pass-time {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--bg-body);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; padding: 1rem; border-right: none; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+            .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 0.5rem; }
+            .nav-item { white-space: nowrap; padding: 0.5rem 0.75rem; }
+            main { padding: 1.5rem; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .data-table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside>
+        <div class="brand">
+            <div class="brand-icon">J</div>
+            <div class="brand-text">
+                <h1>Validation SOP</h1>
+                <span>Jettuce Topic System</span>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('overview')">
+                <span class="nav-icon">🎯</span> Overview & Idea
+            </li>
+            <li class="nav-item" onclick="switchTab('tools')">
+                <span class="nav-icon">📊</span> Tool Signals
+            </li>
+            <li class="nav-item" onclick="switchTab('comp')">
+                <span class="nav-icon">🕵️</span> Comp Audit
+            </li>
+            <li class="nav-item" onclick="switchTab('package')">
+                <span class="nav-icon">📦</span> Packaging & Social
+            </li>
+            <li class="nav-item" onclick="switchTab('sop')">
+                <span class="nav-icon">⚡</span> The 5-Pass SOP
+            </li>
+        </ul>
+    </aside>
+
+    <!-- MAIN VIEWS -->
+    <main>
+
+        <!-- VIEW 1: OVERVIEW -->
+        <div id="view-overview" class="page-view active">
+            <div class="page-header">
+                <h1 class="page-title">Topic Validation System</h1>
+                <p class="page-subtitle">Build a stack of evidence to avoid spending 30 hours on a dead topic.</p>
+            </div>
+
+            <div class="flow-diagram">
+                <span class="flow-step">IDEA</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step">DEMAND</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step">COMPETITION</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step">GAP</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step">PACKAGING</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step">FEASIBILITY</span>
+                <span class="flow-arrow">➔</span>
+                <span class="flow-step" style="color: var(--accent-green);">DECISION</span>
+            </div>
+
+            <div class="section-block">
+                <h2 class="section-title"><span class="step-num">0</span> First: The One-Sentence Rule</h2>
+                <div class="card">
+                    <p>Before opening any tools, force yourself to articulate your premise.</p>
+                    <div class="example-box">
+                        <strong>Formula:</strong><br>
+                        "I want to make a video about [THING] because [REASON PEOPLE MIGHT CARE]."
+                    </div>
+                    <ul class="status-list">
+                        <li>
+                            <span class="indicator">✅</span>
+                            <div>
+                                <strong>Good:</strong> "I want to make a video about O2Jam because it was a huge part of Filipino internet-café culture and I want to understand what happened to it."
+                            </div>
+                        </li>
+                        <li>
+                            <span class="indicator">✅</span>
+                            <div>
+                                <strong>Good:</strong> "I want to make a video about Insaniquarium because it is bizarre enough that the experience of playing it might itself be entertaining."
+                            </div>
+                        </li>
+                        <li>
+                            <span class="indicator">❌</span>
+                            <div>
+                                <strong>Bad:</strong> If you can't explain why a stranger would care, do not research it yet.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: TOOL SIGNALS -->
+        <div id="view-tools" class="page-view">
+            <div class="page-header">
+                <h1 class="page-title">Tool Signals</h1>
+                <p class="page-subtitle">Interviewing the search bar for demand and context.</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">1</span> YT Autocomplete</h2>
+                    <p>Your first cheap signal. Start typing the entity and see what branches out.</p>
+                    <div class="example-box">
+                        <span class="search-term">O2Jam why</span><br>
+                        <span class="search-term">O2Jam history</span><br>
+                        <span class="search-term">what happened to O2Jam</span>
+                    </div>
+                    <p><strong>Good:</strong> Multiple questions surround the entity.<br>
+                    <strong>Less Interesting:</strong> You type the game's name and nothing useful appears.</p>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">2</span> Google Autocomplete</h2>
+                    <p>Reflects actual searches, location context, and trending interest. Ask it questions:</p>
+                    <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+                        <li><strong>Problem:</strong> <span class="search-term">why [entity]</span></li>
+                        <li><strong>History:</strong> <span class="search-term">[entity] history</span></li>
+                        <li><strong>Culture:</strong> <span class="search-term">[entity] Philippines</span></li>
+                        <li><strong>Current:</strong> <span class="search-term">[entity] 2026</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card section-block">
+                <h2 class="section-title"><span class="step-num">3</span> Google Trends</h2>
+                <p>Search as a <em>Topic</em> (not just search term) to gauge broad interest. Test timelines: 5 years ➔ 12 months ➔ 90 days.</p>
+                <div class="grid-3" style="margin-top: 1rem;">
+                    <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius-sm);">
+                        <span class="indicator">🟢</span> <strong>Evergreen</strong>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Continuous interest. Great for "Why Was X So Addictive?"</p>
+                    </div>
+                    <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius-sm);">
+                        <span class="indicator">🟢</span> <strong>Resurging</strong>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Low baseline, sudden spike. Great for "Why is everyone playing X again?"</p>
+                    </div>
+                    <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius-sm);">
+                        <span class="indicator">🔴</span> <strong>Dead</strong>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Flatlines forever. Idea needs to be exceptionally compelling.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">4</span> Compare Entities</h2>
+                    <p>Use Trends to benchmark. e.g., <span class="search-term">Peggle</span> vs <span class="search-term">PvZ</span>.</p>
+                    <p>If your game is smaller, it means a smaller audience but potentially less competition and a tighter community.</p>
+                </div>
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">5</span> vidIQ Keyword</h2>
+                    <p>Find the <strong>language</strong> the audience uses. They might not search "Retrospective", but they do search "why is it addictive".</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: COMP AUDIT -->
+        <div id="view-comp" class="page-view">
+            <div class="page-header">
+                <h1 class="page-title">Competition Audit</h1>
+                <p class="page-subtitle">Finding out what already exists and where the gaps are.</p>
+            </div>
+
+            <div class="section-block">
+                <h2 class="section-title"><span class="step-num">6</span> Search the Actual Idea</h2>
+                <div class="example-box" style="border-left-color: var(--accent-red);">
+                    <strong>Stop asking:</strong> "Is Peggle popular?"<br>
+                    <strong>Start asking:</strong> "Does the exact video I want to make already exist?"
+                </div>
+            </div>
+
+            <div class="section-block">
+                <h2 class="section-title"><span class="step-num">7</span> The Competition Table</h2>
+                <p>Open the top 10-20 results. Make a quick audit of the landscape.</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Video</th>
+                            <th>Views</th>
+                            <th>Age</th>
+                            <th>Topic / Angle</th>
+                            <th>Strength</th>
+                            <th>Weakness</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Video A</td>
+                            <td>2.1M</td>
+                            <td>4y</td>
+                            <td>History</td>
+                            <td>Strong Authority</td>
+                            <td>Old / Outdated</td>
+                        </tr>
+                        <tr>
+                            <td>Video B</td>
+                            <td>300K</td>
+                            <td>8mo</td>
+                            <td>Addiction</td>
+                            <td>Great Premise</td>
+                            <td>Weak Thumbnail</td>
+                        </tr>
+                        <tr>
+                            <td>Video C</td>
+                            <td>12K</td>
+                            <td>2mo</td>
+                            <td>Review</td>
+                            <td>Recent</td>
+                            <td>Tiny Reach / Weak</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">8 & 9</span> Content Gaps</h2>
+                    <p>Check YT Studio Trends tab for official gaps. But manually hunt for <strong>Angle Gaps</strong>.</p>
+                    <p>If there's a 2018 history video and a 2022 documentary, but nobody made <br><em>"Why Did Everyone in the PH Play O2Jam?"</em> ➔ <strong>That's your gap.</strong></p>
+                </div>
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">11 & 12</span> Channel Outliers</h2>
+                    <p>Look for videos that outperformed their channel's average.</p>
+                    <p>Channel usually gets 20K views, but their video on your topic got <strong>700K</strong>. This proves the topic reaches beyond existing subscribers.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: PACKAGING & SOCIAL -->
+        <div id="view-package" class="page-view">
+            <div class="page-header">
+                <h1 class="page-title">Packaging & Social Validation</h1>
+                <p class="page-subtitle">Ensuring the idea is clickable and has human momentum.</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">13</span> Thumbnail Audit</h2>
+                    <p>What visual promise is the competition making? (Logos, nostalgic screenshots, dramatic faces).</p>
+                    <p>Can you visually communicate a <strong>DIFFERENT</strong> but equally obvious promise?</p>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">14</span> Write 3-5 Titles</h2>
+                    <p>If you can only think of "O2Jam Retrospective", park it.</p>
+                    <ul style="padding-left: 1.5rem; color: var(--brand-primary); font-weight: 500;">
+                        <li>Why Did Everyone in the PH Play O2Jam?</li>
+                        <li>Whatever Happened to O2Jam?</li>
+                        <li>The Game That Took Over the Philippines</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <h2 class="section-title"><span class="step-num">15</span> The "Stranger Test"</h2>
+                <div class="example-box">
+                    <strong>Title A:</strong> "O2Jam Retrospective" ➔ <em>Strangers don't care.</em><br><br>
+                    <strong>Title B:</strong> "Why Did Everyone in the Philippines Play O2Jam?" ➔ <em>Strangers are curious about the phenomenon, even if they don't know the game.</em>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">16</span> Reddit / Forums</h2>
+                    <p>Look for emotional energy, nostalgia, arguments, and rediscovery. High emotional energy offsets low raw search volume.</p>
+                </div>
+                <div class="card">
+                    <h2 class="section-title"><span class="step-num">17 & 18</span> TikTok & News</h2>
+                    <p>Is the topic experiencing a cultural momentum surge elsewhere? (Viral TikToks, new dev announcements, game shutdowns).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: EXECUTION SOP -->
+        <div id="view-sop" class="page-view">
+            <div class="page-header">
+                <h1 class="page-title">The 5-Pass SOP</h1>
+                <p class="page-subtitle">Don't spend 3 hours researching. Follow this timed framework.</p>
+            </div>
+
+            <div class="grid-2 section-block">
+                <div class="pass-box">
+                    <span class="pass-time">10 MIN</span>
+                    <h3>PASS 1: "Does anyone care?"</h3>
+                    <p>Check YT Auto, Google Auto, Trends, vidIQ. Search the obvious title.</p>
+                    <p><em>Action: If absolutely nothing is happening, park it.</em></p>
+                </div>
+
+                <div class="pass-box">
+                    <span class="pass-time">15-20 MIN</span>
+                    <h3>PASS 2: "Is there an opportunity?"</h3>
+                    <p>Audit 10-20 top videos. Record views, age, channel size, angles. Find recent outliers and angle gaps.</p>
+                </div>
+
+                <div class="pass-box">
+                    <span class="pass-time">10 MIN</span>
+                    <h3>PASS 3: "Can I package this?"</h3>
+                    <p>Write 5 titles. Sketch 2-3 thumbnail concepts.</p>
+                    <p><em>Action: If titles suck and thumbs are impossible, park it.</em></p>
+                </div>
+
+                <div class="pass-box">
+                    <span class="pass-time">10 MIN</span>
+                    <h3>PASS 4: "Is there a human audience?"</h3>
+                    <p>Check Reddit, TikTok, comments. Look for people talking, not just searching.</p>
+                </div>
+
+                <div class="pass-box" style="grid-column: 1 / -1; border-color: var(--brand-primary); background: var(--brand-light);">
+                    <span class="pass-time" style="background: white;">5 MIN</span>
+                    <h3>PASS 5: "Is this worth MY time?"</h3>
+                    <p>1. How many hours will this take? (Remember Diner Dash fatigue)<br>
+                    2. How strong is the evidence?<br>
+                    3. Am I personally excited enough to do it?</p>
+                </div>
+            </div>
+
+            <div class="card section-block">
+                <h2 class="section-title">Validation Rubric</h2>
+                <p>If you get 5-6 strong signals out of 7, greenlight the project. Do not rely purely on SEO numbers.</p>
+                <table class="data-table" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Signal</th>
+                            <th>Assessment Goal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Demand</strong></td><td>Do people care?</td></tr>
+                        <tr><td><strong>Momentum</strong></td><td>Do people care <em>right now</em>?</td></tr>
+                        <tr><td><strong>Competition</strong></td><td>How many people already made this?</td></tr>
+                        <tr><td><strong>Gap</strong></td><td>Is there an angle they haven't nailed?</td></tr>
+                        <tr><td><strong>Packaging</strong></td><td>Can I make someone curious in one image/title?</td></tr>
+                        <tr><td><strong>Production</strong></td><td>Can I make this without sacrificing a month of my life?</td></tr>
+                        <tr><td><strong>Personal Fit</strong></td><td>Am I excited enough to make this entertaining?</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Simple tab switching logic
+        function switchTab(tabId) {
+            // Update active state in sidebar
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Update active view
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById('view-' + tabId).classList.add('active');
+
+            // Scroll to top
+            document.querySelector('main').scrollTop = 0;
+        }
+    </script>
+</body>
+</html>

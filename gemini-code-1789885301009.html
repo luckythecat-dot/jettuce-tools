@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jettuce Game Quarry & Content Strategy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f1117;
+            --card-bg: #161922;
+            --card-border: #262b38;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-yellow: #f59e0b;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --tag-yellow-bg: rgba(245, 158, 11, 0.1);
+            --tag-yellow-text: #fbbf24;
+            --tag-green-bg: rgba(16, 185, 129, 0.1);
+            --tag-green-text: #34d399;
+            --code-bg: #0d0f14;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header Styling */
+        header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: var(--tag-yellow-bg);
+            color: var(--tag-yellow-text);
+            margin-bottom: 0.75rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+        }
+
+        .intro-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 1rem;
+            font-size: 1.05rem;
+            color: #cbd5e1;
+        }
+
+        .intro-box p + p {
+            margin-top: 0.75rem;
+        }
+
+        /* Section Styling */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.25rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-group {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px dashed var(--card-border);
+        }
+
+        .game-group:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .game-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .game-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Pitch / Angle Box */
+        .angle-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .angle-item {
+            background-color: var(--code-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.6rem 0.85rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #38bdf8;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .angle-item::before {
+            content: "➔";
+            color: var(--text-muted);
+        }
+
+        /* Highlight Grid for Candidate Games */
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .candidate-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-top: 3px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .candidate-name {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .candidate-pitch {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.825rem;
+            color: var(--accent-green);
+        }
+
+        /* Channel Identity Summary */
+        .identity-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .identity-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #c084fc;
+            margin-bottom: 0.75rem;
+        }
+
+        .identity-list {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+            color: #cbd5e1;
+        }
+
+        .identity-list li {
+            margin-bottom: 0.4rem;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 1rem 0.5rem; }
+            h1 { font-size: 1.75rem; }
+            .candidates-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <span class="badge">Content Strategy</span>
+        <h1>Jettuce Game Quarry</h1>
+        
+        <div class="intro-box">
+            <p><strong>The Sweet Spot:</strong> Games with a strong premise, recognizable aesthetic/personality, or weird cultural footprint—that <em>don't</em> require 50 hours of mastery to understand.</p>
+            <p>Leans heavily into 2000s/early-2010s PC + childhood internet culture, with a specific focus on Philippine internet café nostalgia (O2Jam, Ragnarok Online, Audition) as a unique secret spice.</p>
+        </div>
+    </header>
+
+    <!-- SECTION 1 -->
+    <h2 class="section-title"><span style="color: var(--accent-yellow);">🟡</span> 1. Mini Retrospective / Analysis</h2>
+    <div class="category-card">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">Requires a focused, specific thesis question rather than a broad history lesson.</p>
+        
+        <div class="game-group">
+            <div class="game-title">PopCap Games (Goldmine)</div>
+            <div class="game-desc">Simple mechanics make it easy to talk about why they work without needing 50 hours of footage.</div>
+            <ul class="angle-list">
+                <li class="angle-item">Peggle: "Why Was Peggle So Addictive?" / "Why Does Peggle Feel Like a Perfect Video Game?"</li>
+                <li class="angle-item">Zuma Deluxe: "Why Were We All Addicted to Zuma?" / "The Game That Turned Matching Colors Into Gambling"</li>
+                <li class="angle-item">Insaniquarium: "Why Was Insaniquarium So F***ing Weird?" / "The Strangest Game PopCap Ever Made"</li>
+                <li class="angle-item">Bookworm Adventures: "Why Did This Word Game Have So Much Personality?"</li>
+                <li class="angle-item">Plants vs. Zombies: "Why Does Plants vs. Zombies Still Feel So Good?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <h2 class="section-title"><span style="color: var(--accent-yellow);">🟡</span> 2. Retro / Niche Game Investigation</h2>
+    <div class="category-card">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">High potential lane connecting game history with specific Philippine internet-café culture.</p>
+
+        <div class="game-group">
+            <div class="game-title">O2Jam</div>
+            <div class="game-desc">Combines personal context + PH computer shop nostalgia + rhythmic gameplay.</div>
+            <ul class="angle-list">
+                <li class="angle-item">"Why Did Everyone in the Philippines Play O2Jam?"</li>
+                <li class="angle-item">"I Went Back to the Internet Cafe Game That Raised Me"</li>
+            </ul>
+        </div>
+
+        <div class="game-group">
+            <div class="game-title">Audition Online</div>
+            <div class="game-desc">Rhythm game meets early internet social network/dating culture.</div>
+            <ul class="angle-list">
+                <li class="angle-item">"The Internet Cafe Game That Was Basically a Dating App"</li>
+                <li class="angle-item">"Why Was Audition Online So Popular in the Philippines?"</li>
+            </ul>
+        </div>
+
+        <div class="game-group">
+            <div class="game-title">Ragnarok Online & Gunbound</div>
+            <div class="game-desc">Massive titles that need a single focused angle rather than a full history lesson.</div>
+            <ul class="angle-list">
+                <li class="angle-item">"I Finally Played the Game My Internet Cafe Friends Were Obsessed With"</li>
+                <li class="angle-item">"Why Did Everyone at the Computer Shop Play Gunbound?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <h2 class="section-title"><span style="color: var(--accent-green);">🟢</span> 3. "I Played the Weirdest Games"</h2>
+    <div class="category-card">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">Core premise: <em>"I cannot believe someone made this."</em> The game does half the comedic heavy lifting.</p>
+        
+        <div class="game-group">
+            <ul class="angle-list">
+                <li class="angle-item">Hatoful Boyfriend ➔ "I Played the Pigeon Dating Simulator"</li>
+                <li class="angle-item">Jazzpunk ➔ "What the F*** Is Jazzpunk?" (Tailor-made for observational humor)</li>
+                <li class="angle-item">I Am Bread ➔ "I Played a Game Where You Are Literally Bread"</li>
+                <li class="angle-item">Octodad ➔ "I Played a Game Where Nobody Notices I'm an Octopus"</li>
+                <li class="angle-item">Untitled Goose Game ➔ "I Played a Game About Being an Absolute Menace"</li>
+                <li class="angle-item">Goat Simulator ➔ "I Played Goat Simulator in 2026 and I Understand Nothing"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 4 -->
+    <h2 class="section-title"><span style="color: var(--accent-green);">🟢</span> 4. The 2000s Casual-Game Rabbit Hole</h2>
+    <div class="category-card">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">Exploring the ecosystem around Diner Dash rather than single-game challenge videos.</p>
+        
+        <div class="game-group">
+            <div class="game-title">Ecosystem Games</div>
+            <div class="game-desc">Cake Mania, Wedding Dash, Sally's Salon, Cooking Dash, Farm Frenzy, Virtual Villagers, Plant Tycoon, Fish Tycoon.</div>
+            <ul class="angle-list">
+                <li class="angle-item">"Why Were 2000s PC Games So Addictive?" (Diner Dash ➔ Cake Mania ➔ Zuma ➔ Peggle)</li>
+                <li class="angle-item">"Why Did Every 2000s Game Have a Tycoon Version?" (Zoo Tycoon, Fish Tycoon, Hospital Tycoon)</li>
+                <li class="angle-item">"Why Did Every Game Need a Sequel?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <h2 class="section-title"><span style="color: var(--accent-yellow);">🟡</span> 5. Franchise / Ranking & 🟢 6. Flash Era</h2>
+    <div class="category-card">
+        <div class="game-group">
+            <div class="game-title">Franchise & Ranking Concepts</div>
+            <ul class="angle-list">
+                <li class="angle-item">"I Played 5 PopCap Games From My Childhood and Ranked Them"</li>
+                <li class="angle-item">"I Went Down the Big Fish Games Rabbit Hole"</li>
+                <li class="angle-item">"I Played Every 'Dash' Game From the 2000s"</li>
+            </ul>
+        </div>
+
+        <div class="game-group">
+            <div class="game-title">Browser & Flash Era Nostalgia</div>
+            <div class="game-desc">Short games, bizarre premises, and instant nostalgia.</div>
+            <ul class="angle-list">
+                <li class="angle-item">Motherload ➔ "Why Was Motherload So Addictive?"</li>
+                <li class="angle-item">The Impossible Quiz ➔ "Why Was The Impossible Quiz So Popular?"</li>
+                <li class="angle-item">Fancy Pants Adventures ➔ "I Played the Most 2000s Flash Game Ever"</li>
+                <li class="angle-item">Line Rider / Happy Wheels ➔ Cultural phenomenon breakdowns</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- IMMEDIATE CANDIDATES GRID -->
+    <h2 class="section-title"><span style="color: var(--accent-green);">🟢</span> Immediate Strong Candidates</h2>
+    <div class="candidates-grid">
+        <div class="candidate-card">
+            <div class="candidate-name">O2Jam</div>
+            <div class="candidate-pitch">Why Did Everyone in the PH Play O2Jam?</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Audition Online</div>
+            <div class="candidate-pitch">The Internet Cafe's Favorite Dating Game</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Insaniquarium</div>
+            <div class="candidate-pitch">Why Was This Game So F***ing Weird?</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Peggle / Zuma</div>
+            <div class="candidate-pitch">Why Were We All Addicted to This?</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Motherload</div>
+            <div class="candidate-pitch">Why Was This Flash Game So Addictive?</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Hatoful Boyfriend</div>
+            <div class="candidate-pitch">I Played the Pigeon Dating Simulator</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Virtual / Plant Tycoon</div>
+            <div class="candidate-pitch">Why Were 2000s Games Obsessed With Leaving Things Running?</div>
+        </div>
+        <div class="candidate-card">
+            <div class="candidate-name">Big Fish Games</div>
+            <div class="candidate-pitch">I Went Down the Big Fish Games Rabbit Hole</div>
+        </div>
+    </div>
+
+    <!-- IDENTITY SUMMARY -->
+    <div class="identity-box">
+        <div class="identity-title">Emerging Channel Identity</div>
+        <p style="margin-bottom: 0.75rem; color: #e2e8f0;"><strong>"I find games with a story attached to them."</strong> (Not necessarily an in-game story, but the cultural/meta story around the game):</p>
+        <ul class="identity-list">
+            <li><em>"Why was this so popular?"</em></li>
+            <li><em>"What happened to this?"</em></li>
+            <li><em>"Why is this game insane / How did this get made?"</em></li>
+            <li><em>"I'm going to play this ridiculous thing and see what happens."</em></li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
